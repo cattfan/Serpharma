@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'homepage.dart'; // Import tệp home_page.dart
+import 'navbar.dart';
 
 void main() {
   runApp(const MyApp());
@@ -14,9 +14,9 @@ class MyApp extends StatelessWidget {
       title: 'Serpharma',
       theme: ThemeData(
         primarySwatch: Colors.blue,
-        fontFamily: 'Open Sans', // Bạn có thể chọn font chữ phù hợp
+        fontFamily: 'Open Sans',
       ),
-      home: const HomePage(),
+      home: const MainPage(),
       debugShowCheckedModeBanner: false,
     );
   }
