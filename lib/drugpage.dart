@@ -1,4 +1,31 @@
+import 'dart:math';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'drugdetailpage.dart';
+
+List<Map<String, String>> _parseAndLoadDrugs(String category) {
+  final List<Map<String, String>> loadedDrugs = [
+    {"image": "images/8.jpg", "name": "Panadol Extra"},
+    {"image": "images/9.jpg", "name": "Amoxicillin 500mg"},
+    {"image": "images/10.jpg", "name": "Ibuprofen 200mg"},
+    {"image": "images/11.jpg", "name": "Cetirizine 10mg"},
+    {"image": "images/12.jpg", "name": "Panadol Cảm Cúm"},
+    {"image": "images/13.jpg", "name": "Loratadine 10mg"},
+    {"image": "images/14.jpg", "name": "Omeprazole 20mg"},
+    {"image": "images/15.jpg", "name": "Salbutamol Inhaler"},
+    {"image": "images/16.jpg", "name": "Panadol Trẻ Em"},
+    {"image": "images/17.jpg", "name": "Metformin 500mg"},
+    {"image": "images/8.jpg", "name": "Aspirin 81mg"},
+    {"image": "images/9.jpg", "name": "Atorvastatin 20mg"},
+    {"image": "images/10.jpg", "name": "Ciprofloxacin 500mg"},
+    {"image": "images/11.jpg", "name": "Diclofenac 50mg"},
+    {"image": "images/12.jpg", "name": "Paracetamol 500mg"},
+    {"image": "images/13.jpg", "name": "Berberin B12"},
+    {"image": "images/14.jpg", "name": "Eugica Forte"},
+    {"image": "images/15.jpg", "name": "Strepsils Cool"},
+  ];
+  return loadedDrugs;
+}
 
 class DrugPage extends StatefulWidget {
   const DrugPage({super.key});
@@ -7,8 +34,10 @@ class DrugPage extends StatefulWidget {
   State<DrugPage> createState() => _DrugPageState();
 }
 
-class _DrugPageState extends State<DrugPage> with SingleTickerProviderStateMixin {
+class _DrugPageState extends State<DrugPage>
+    with SingleTickerProviderStateMixin {
   late final TabController _tabController;
+  String _activeFilter = 'Tất cả';
 
   final List<String> _categories = [
     'Thuốc kháng sinh',
@@ -29,13 +58,34 @@ class _DrugPageState extends State<DrugPage> with SingleTickerProviderStateMixin
     super.dispose();
   }
 
+  void _showFilterOptions(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return _FilterOptionsSheet(
+          initialFilter: _activeFilter,
+          onFilterSelected: (selectedFilter) {
+            setState(() {
+              _activeFilter = selectedFilter;
+            });
+            Navigator.pop(context);
+          },
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF0F4F8),
+      backgroundColor: const Color(0xFFD7E8FF),
       appBar: AppBar(
         toolbarHeight: 68,
-        backgroundColor: const Color(0xFFF0F4F8),
+        backgroundColor: const Color(0xFFD7E8FF),
         elevation: 0,
         title: const SearchBarWidget(),
         automaticallyImplyLeading: false,
@@ -44,7 +94,7 @@ class _DrugPageState extends State<DrugPage> with SingleTickerProviderStateMixin
         padding: const EdgeInsets.symmetric(horizontal: 16.0),
         child: Column(
           children: [
-            const FilterButton(),
+            FilterButton(onPressed: () => _showFilterOptions(context)),
             const SizedBox(height: 16),
             TabBar(
               controller: _tabController,
@@ -59,8 +109,11 @@ class _DrugPageState extends State<DrugPage> with SingleTickerProviderStateMixin
               child: TabBarView(
                 controller: _tabController,
                 children: _categories.map((category) {
-                  // Mỗi tab giờ là một DrugGridView riêng biệt
-                  return DrugGridView(category: category);
+                  return DrugGridView(
+                    key: ValueKey('$category-$_activeFilter'),
+                    category: category,
+                    filter: _activeFilter,
+                  );
                 }).toList(),
               ),
             ),
@@ -110,14 +163,15 @@ class SearchBarWidget extends StatelessWidget {
 }
 
 class FilterButton extends StatelessWidget {
-  const FilterButton({super.key});
+  final VoidCallback onPressed;
+  const FilterButton({super.key, required this.onPressed});
 
   @override
   Widget build(BuildContext context) {
     return Align(
       alignment: Alignment.centerRight,
       child: OutlinedButton.icon(
-        onPressed: () {},
+        onPressed: onPressed,
         icon: const Icon(Icons.filter_list),
         label: const Text('Filter'),
         style: OutlinedButton.styleFrom(
@@ -132,21 +186,117 @@ class FilterButton extends StatelessWidget {
   }
 }
 
+class _FilterOptionsSheet extends StatefulWidget {
+  final String initialFilter;
+  final Function(String) onFilterSelected;
+
+  const _FilterOptionsSheet({
+    required this.initialFilter,
+    required this.onFilterSelected,
+  });
+
+  @override
+  State<_FilterOptionsSheet> createState() => _FilterOptionsSheetState();
+}
+
+class _FilterOptionsSheetState extends State<_FilterOptionsSheet> {
+  late String _selectedOption;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedOption = widget.initialFilter;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Row(
+                children: [
+                  Icon(Icons.filter_list, color: Colors.black54),
+                  SizedBox(width: 8),
+                  Text(
+                    'Filter',
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
+                ],
+              ),
+              IconButton(
+                icon: const Icon(Icons.close),
+                onPressed: () => Navigator.pop(context),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          Wrap(
+            spacing: 12.0,
+            runSpacing: 12.0,
+            children: [
+              _buildFilterChip('Tất cả'),
+              _buildFilterChip('Thuốc theo tên (A-Z)'),
+              _buildFilterChip('Thuốc mới rút số'),
+            ],
+          ),
+          const SizedBox(height: 20),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFilterChip(String label) {
+    final isSelected = _selectedOption == label;
+
+    return ChoiceChip(
+      label: Text(label),
+      avatar: isSelected
+          ? const Icon(Icons.check, color: Colors.white, size: 18)
+          : null,
+      selected: isSelected,
+      onSelected: (selected) {
+        if (selected) {
+          widget.onFilterSelected(label);
+        }
+      },
+      backgroundColor: Colors.grey.shade200,
+      selectedColor: const Color(0xFF4A6AAB),
+      labelStyle: TextStyle(
+        color: isSelected ? Colors.white : Colors.black87,
+      ),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20.0),
+        side: BorderSide.none,
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      showCheckmark: false,
+    );
+  }
+}
+
+
 class DrugGridView extends StatefulWidget {
-  // Nhận category để có thể tải dữ liệu khác nhau cho mỗi tab
   final String category;
-  const DrugGridView({super.key, required this.category});
+  final String filter;
+  const DrugGridView(
+      {super.key, required this.category, required this.filter});
 
   @override
   State<DrugGridView> createState() => _DrugGridViewState();
 }
 
-// Thêm "with AutomaticKeepAliveClientMixin"
-class _DrugGridViewState extends State<DrugGridView> with AutomaticKeepAliveClientMixin<DrugGridView> {
-  List<Map<String, String>> _drugs = [];
+class _DrugGridViewState extends State<DrugGridView>
+    with AutomaticKeepAliveClientMixin<DrugGridView> {
+  List<Map<String, String>> _allDrugs = [];
+  List<Map<String, String>> _filteredDrugs = [];
   bool _isLoading = true;
 
-  // Ghi đè wantKeepAlive và trả về true để giữ lại trạng thái của tab
   @override
   bool get wantKeepAlive => true;
 
@@ -156,43 +306,47 @@ class _DrugGridViewState extends State<DrugGridView> with AutomaticKeepAliveClie
     _loadDrugData();
   }
 
-  Future<void> _loadDrugData() async {
-    // Giả lập việc tải dữ liệu từ mạng hoặc CSDL
-    await Future.delayed(const Duration(milliseconds: 500));
+  @override
+  void didUpdateWidget(covariant DrugGridView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if(oldWidget.filter != widget.filter) {
+      _applyFilter();
+    }
+  }
 
-    // Dữ liệu mẫu (trong thực tế bạn sẽ tải dữ liệu dựa trên widget.category)
-    final List<Map<String, String>> loadedDrugs = [
-      {"image": "images/8.jpg", "name": "Panadol Extra"},
-      {"image": "images/9.jpg", "name": "Amoxicillin 500mg"},
-      {"image": "images/10.jpg", "name": "Ibuprofen 200mg"},
-      {"image": "images/11.jpg", "name": "Cetirizine 10mg"},
-      {"image": "images/12.jpg", "name": "Panadol Cảm Cúm"},
-      {"image": "images/13.jpg", "name": "Loratadine 10mg"},
-      {"image": "images/14.jpg", "name": "Omeprazole 20mg"},
-      {"image": "images/15.jpg", "name": "Salbutamol Inhaler"},
-      {"image": "images/16.jpg", "name": "Panadol Trẻ Em"},
-      {"image": "images/17.jpg", "name": "Metformin 500mg"},
-      {"image": "images/8.jpg", "name": "Aspirin 81mg"},
-      {"image": "images/9.jpg", "name": "Atorvastatin 20mg"},
-      {"image": "images/10.jpg", "name": "Ciprofloxacin 500mg"},
-      {"image": "images/11.jpg", "name": "Diclofenac 50mg"},
-      {"image": "images/12.jpg", "name": "Paracetamol 500mg"},
-      {"image": "images/13.jpg", "name": "Berberin B12"},
-      {"image": "images/14.jpg", "name": "Eugica Forte"},
-      {"image": "images/15.jpg", "name": "Strepsils Cool"},
-    ];
+  Future<void> _loadDrugData() async {
+    final loadedDrugs = await compute(_parseAndLoadDrugs, widget.category);
 
     if (mounted) {
       setState(() {
-        _drugs = loadedDrugs;
+        _allDrugs = List.from(loadedDrugs);
+        _filteredDrugs = List.from(loadedDrugs);
         _isLoading = false;
+        _applyFilter();
       });
     }
   }
 
+  void _applyFilter() {
+    List<Map<String, String>> tempDrugs = List.from(_allDrugs);
+    switch (widget.filter) {
+      case 'Thuốc theo tên (A-Z)':
+        tempDrugs.sort((a, b) => a['name']!.compareTo(b['name']!));
+        break;
+      case 'Thuốc mới rút số':
+        tempDrugs.shuffle(Random());
+        break;
+      case 'Tất cả':
+      default:
+        break;
+    }
+    setState(() {
+      _filteredDrugs = tempDrugs;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    // Quan trọng: Phải gọi super.build(context) khi dùng AutomaticKeepAliveClientMixin
     super.build(context);
 
     if (_isLoading) {
@@ -207,11 +361,25 @@ class _DrugGridViewState extends State<DrugGridView> with AutomaticKeepAliveClie
         mainAxisSpacing: 16.0,
         childAspectRatio: 0.7,
       ),
-      itemCount: _drugs.length,
+      itemCount: _filteredDrugs.length,
       itemBuilder: (context, index) {
-        return DrugGridItem(
-          imagePath: _drugs[index]['image']!,
-          name: _drugs[index]['name']!,
+        final drug = _filteredDrugs[index];
+        return GestureDetector(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => DrugDetailPage(
+                  drugName: drug['name']!,
+                  imagePath: drug['image']!,
+                ),
+              ),
+            );
+          },
+          child: DrugGridItem(
+            imagePath: drug['image']!,
+            name: drug['name']!,
+          ),
         );
       },
     );

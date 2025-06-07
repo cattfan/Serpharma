@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:serpharma/setting.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -33,7 +34,7 @@ class SizedHeaderBackground extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 240,
+      height: 300,
       width: double.infinity,
       color: const Color(0xFF1F3A60),
     );
@@ -60,7 +61,12 @@ class Header extends StatelessWidget {
               ),
               IconButton(
                 icon: const Icon(Icons.settings_outlined, color: Colors.white),
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const SettingsPage()),
+                  );
+                },
               ),
             ],
           ),

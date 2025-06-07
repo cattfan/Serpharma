@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'homepage.dart';
 import 'drugpage.dart';
+import 'tracuuthuoc.dart';
 
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
@@ -15,8 +16,8 @@ class _MainPageState extends State<MainPage> {
   static const List<Widget> _widgetOptions = <Widget>[
     HomePage(),
     DrugPage(),
-    Text('Trang Điều Trị'), // Placeholder
-    Text('Trang Tương tác'), // Placeholder
+    Text('Trang Điều Trị'),
+    InteractionLookupPage(),
   ];
 
   void _onItemTapped(int index) {
@@ -53,7 +54,7 @@ class _MainPageState extends State<MainPage> {
             label: 'Điều Trị',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.person_outline),
+            icon: Icon(Icons.compare_arrows),
             label: 'Tương tác',
           ),
         ],
